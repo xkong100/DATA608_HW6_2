@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+	<title>Data608: assignment 5 part 2</title>
+        <script type="text/javascript" src="http://d3js.org/d3.v3.js"></script>
+    </head>
+    <body>
+	
+	<hr>
+	
+	<table width="100%">
+		<tr>
+			<td width="60%">
+				<p><b>Weight and Heights of US Presidents:</b></p>
+				<div id="pres"></div>
+			</td>
+			<td width="5%" valign="top">
+			</td>
+			<td width="35%" valign="top">
+				<p><b>Enter Name of a President:</b></p>
+				<form name="assn5Form">
+					<input type="text" name="pname">
+					<input type="button" value="Ok" onclick="javascript:findPres();">
+				</form>
+				<p />
+				<div id='reslt'></div>
+			</td>
+		</tr>
+	</table>
+        <script type="text/javascript">
+			
+		var parsedCSV = [];
+		var dataWoHdr = [];
+		d3.text("https://github.com/charleyferrari/CUNY_DATA_608/blob/master/module6/js_examples/Hello%20World/data/presidents.csv", function(dataset) {
+		parsedCSV = d3.csv.parseRows(dataset);
+		
+		// Remove header from data file as I want to make
+		// table header with different background color
+		hdr = parsedCSV[0];
+		// Need to divide the length of hdr bec'z of 3 columns
+		dataWoHdr = parsedCSV.slice(hdr.length/3, parsedCSV.length);
+		
+		tabl(dataWoHdr, ["Name", "Height (in Inch)", "Weight (in lb)"]);
+		});
+		
+		function tabl(data, cols) {
+			var table = d3.select("#pres").append("table")
+					.style("border-collapse", "collapse")
+					.style("border", "4px black solid")
+					.style("background-color", "#F0F8FF")	// light blue
+			,
+				thead = table.append("thead"),
+				tbody = table.append("tbody");
+			// append the header row
+			thead.append("tr")
+				.selectAll("th")
+				.data(cols)
+				.enter()
+				.append("th")
+				.style("padding", "10px")
+				.style("background-color", "grey")
+				.text(function(column) { return column; });
+			// create a row for each object in the data
+			var rows = tbody.selectAll("tr")
+				.data(data)
+				.enter()
+				.append("tr");
+			// create a cell in each row for each column
+			var cells = rows.selectAll("td")
+				.data(function(d){return d;})
+				.enter().append("td")
+				.style("border", "1px blue solid")
+				.style("padding", "10px")
+				.on("mouseover", function(){d3.select(this).style("background-color", "#F2F5A9")})  // light yellow
+				.on("mouseout", function(){d3.select(this).style("background-color", "#F0F8FF")})	// light blue
+				.text(function(d){return d;})
+				.style("color", "blue")
+				.style("font-size", "14px");
+			
+			return table;
+		}
+		// The function below is for finding President info
+		function findPres() {
+			nm = document.assn5Form.pname.value;
+			var j = 0;
+			if (nm!=""){
+				for (j; j<dataWoHdr.length; j++) {
+					if (dataWoHdr[j][0]==nm) break;
+				}
+				if (j >= dataWoHdr.length) {
+					rs = "<b>" + nm + " was not US President</b>";
+				}
+				else {
+					rs = "<b>Height: " + dataWoHdr[j][1]+ " in<br>";
+					rs += "Weight: " + dataWoHdr[j][2] + " lb</b>"
+				}
+			}
+			else {
+				rs = "<b>Enter name of a President</b>";
+			}
+			document.getElementById("reslt").innerHTML = rs;
+		}
+		
+		// Function to search the string
+		function searchString(str, strArray) {
+			return -1;	// No match found
+		}
+		
+		// The function below will stop Enter key default functionality
+		function checkKey(evt) { 
+		  var evt = (evt) ? evt : ((event) ? event : null); 
+		  var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null); 
+		  if ((evt.keyCode == 13) && (node.type=="text"))  {return false;} 
+		} 
+		document.onkeypress = checkKey; 
+			
+        </script>
+    </body>
+</html>
